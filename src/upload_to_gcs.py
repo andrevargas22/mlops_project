@@ -8,7 +8,7 @@ from google.cloud import storage
 GCP_PROJECT = 'mlops-project-428219'
 GCP_BUCKET = 'mlops_energy_consumption_data'
 GCP_FOLDER = 'energy_data'
-FILE_PATH = 'data/raw/consumo.xls'
+FILE_PATH = 'data/raw/consumo_fev.xls'
 
 def authenticate_with_gcs():
     """
