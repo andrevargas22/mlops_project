@@ -71,11 +71,17 @@ def process_data(df):
             return 'Spring'
         
     df['Season'] = df['Month'].apply(get_season)
+
+    df = df[df['Energy'] != 0]
     
     # sort by Region, Year, Month
     df = df.sort_values(['Region', 'Year', 'Month']).reset_index(drop=True)
     
-    df = df[['Region', 'Year', 'Month', 'Season', 'Energy']]
+    # generate lags for the last 3 months
+    for i in range(1, 4):
+        df[f'lag_{i}'] = df.groupby('Region')['Energy'].shift(i)
+    
+    df = df[['Region', 'Year', 'Month', 'Season', 'Energy', 'lag_1', 'lag_2', 'lag_3']]
     
     return df
     

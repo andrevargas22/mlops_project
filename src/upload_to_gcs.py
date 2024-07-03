@@ -139,7 +139,7 @@ def upload_to_gcs(storage_client, dataframe, bucket_name, folder, file_name):
     
     # Upload CSV to GCS
     blob.upload_from_string(csv_buffer, content_type='text/csv')
-    print(f"File {file_name} uploaded to {folder}/{file_name} in bucket {bucket_name}.")
+    print(f"File uploaded to in bucket {bucket_name}.")
     
 if __name__ == "__main__":
     
