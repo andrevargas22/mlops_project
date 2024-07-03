@@ -50,14 +50,14 @@ def clean_energy_data(file_path):
     df = df.dropna()
     
     # Rename columns to more meaningful names
-    df.columns = ["Região", "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", 
-                  "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro", "Total"]
+    df.columns = ["Region", "January", "February", "March", "April", "May", "June", "July", 
+                  "August", "September", "October", "November", "December", "Total"]
 
     # Reset the index of the DataFrame
     df = df.reset_index(drop=True)
     
     # Rename 'TOTAL BRASIL' to 'Brasil' in the 'Região' column
-    df.loc[df['Região'] == 'TOTAL BRASIL', 'Região'] = 'Brasil'
+    df.loc[df['Region'] == 'TOTAL BRASIL', 'Region'] = 'Brasil'
     
     # Create an empty DataFrame to store the filtered data
     df_filter_total = pd.DataFrame()
@@ -94,15 +94,15 @@ def clean_energy_data(file_path):
         years.extend([current_date.year - num_groups] * remaining_rows)
     
     # Add the 'Ano' (Year) column to the DataFrame
-    df_filter_total['Ano'] = years
+    df_filter_total['Year'] = years
 
     # List of month columns
-    month_columns = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 
-                     'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+    month_columns = ["January", "February", "March", "April", "May", "June", "July", 
+                  "August", "September", "October", "November", "December"]
 
     # Transform the DataFrame from wide format to long format
-    cleaned_df = pd.melt(df_filter_total, id_vars=['Região', 'Ano'], value_vars=month_columns, 
-                         var_name='Mês', value_name='Energia')
+    cleaned_df = pd.melt(df_filter_total, id_vars=['Region', 'Year'], value_vars=month_columns, 
+                         var_name='Month', value_name='Energy')
  
     # Save the cleaned DataFrame to a CSV file
     cleaned_df.to_csv(cleaned_file_path, index=False)
