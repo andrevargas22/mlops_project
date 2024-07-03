@@ -29,10 +29,16 @@ jobs:
     - name: Run extraction script
       run: python src/extract.py
 
+    - name: Upload extracted data
+      uses: actions/upload-artifact@v2
+      with:
+        name: extracted-data
+        path: data/raw/consumo.xls
+
     - name: Upload extraction status
       run: echo "Extraction successful" > extraction_status.txt
 
-    - name: Upload artifact
+    - name: Upload extraction status artifact
       uses: actions/upload-artifact@v2
       with:
         name: extraction-status
@@ -58,6 +64,12 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install google-cloud-storage pandas
+
+    - name: Download extracted data
+      uses: actions/download-artifact@v2
+      with:
+        name: extracted-data
+        path: data/raw
 
     - id: 'auth'
       name: Authenticate to Google Cloud
