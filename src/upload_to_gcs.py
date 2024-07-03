@@ -144,7 +144,7 @@ def upload_to_gcs(storage_client, dataframe, bucket_name, folder, file_name):
 if __name__ == "__main__":
     
     current_date = datetime.now()
-    month_var = str(current_date.month-1)
+    month_var = str(current_date.month)
     year_var = str(current_date.year)
         
     # Authenticate with GCS once
