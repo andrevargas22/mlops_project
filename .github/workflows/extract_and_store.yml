@@ -33,4 +33,4 @@ jobs:
     - name: Run upload script
       env:
           GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
-      run: python upload_to_gcs.py
+      run: python src/upload_to_gcs.py
