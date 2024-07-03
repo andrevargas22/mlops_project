@@ -8,7 +8,7 @@ from google.cloud import storage
 GCP_PROJECT = 'mlops-project-428219'
 GCP_BUCKET = 'mlops_energy_consumption_data'
 GCP_FOLDER = 'energy_data'
-FILE_PATH = 'data/raw/consumo_fev.xls'
+FILE_PATH = 'data/raw/consumo_mar.xls'
 
 def authenticate_with_gcs():
     """
@@ -17,10 +17,28 @@ def authenticate_with_gcs():
     Returns:
     storage.Client: Authenticated Google Cloud Storage client.
     """
-    # Read service account credentials from environment variable
     service_account_info = json.loads(os.getenv('GOOGLE_APPLICATION_CREDENTIALS_JSON'))
     storage_client = storage.Client.from_service_account_info(service_account_info)
     return storage_client
+
+def download_existing_data(storage_client, bucket_name, folder, file_name):
+    """
+    Download the existing data from Google Cloud Storage.
+    
+    Args:
+    storage_client (storage.Client): Authenticated Google Cloud Storage client.
+    bucket_name (str): The name of the GCS bucket.
+    folder (str): The folder in the GCS bucket.
+    file_name (str): The name of the file to download.
+    
+    Returns:
+    pd.DataFrame: The existing data as a DataFrame.
+    """
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(f"{folder}/{file_name}")
+    blob.download_to_filename(file_name)
+    existing_df = pd.read_csv(file_name)
+    return existing_df
 
 def clean_energy_data(file_path):
     """
@@ -38,10 +56,6 @@ def clean_energy_data(file_path):
     """
     
     current_date = datetime.now()
-
-    # Define the path for the cleaned CSV file
-    cleaned_file_name = f'energy_consumption-{current_date.month}-{current_date.year}.csv'
-    cleaned_file_path = f'data/temp/{cleaned_file_name}'
     
     # Read the Excel file into a DataFrame
     df = pd.read_excel(file_path)
@@ -103,28 +117,50 @@ def clean_energy_data(file_path):
     # Transform the DataFrame from wide format to long format
     cleaned_df = pd.melt(df_filter_total, id_vars=['Region', 'Year'], value_vars=month_columns, 
                          var_name='Month', value_name='Energy')
- 
-    # Save the cleaned DataFrame to a CSV file
-    cleaned_df.to_csv(cleaned_file_path, index=False)
     
-    return cleaned_file_name, cleaned_file_path
+    return cleaned_df
 
-def upload_to_gcs(source_file_name, bucket_name, destination_blob_name):
+def upload_to_gcs(storage_client, dataframe, bucket_name, folder, file_name):
     """
-    Upload a file to Google Cloud Storage.
+    Upload a DataFrame to Google Cloud Storage.
     
     Args:
-    source_file_name (str): The path of the file to upload.
+    storage_client (storage.Client): Authenticated Google Cloud Storage client.
+    dataframe (pd.DataFrame): The DataFrame to upload.
     bucket_name (str): The name of the GCS bucket.
-    destination_blob_name (str): The destination path and filename in the GCS bucket.
+    folder (str): The folder in the GCS bucket.
+    file_name (str): The name of the file to upload.
     """
-    storage_client = authenticate_with_gcs()
     bucket = storage_client.bucket(bucket_name)
-    blob = bucket.blob(destination_blob_name)
-    blob.upload_from_filename(source_file_name)
-    print(f"File {source_file_name} uploaded to {destination_blob_name}.")
+    blob = bucket.blob(f"{folder}/{file_name}")
+    
+    # Convert DataFrame to CSV format in memory
+    csv_buffer = dataframe.to_csv(index=False)
+    
+    # Upload CSV to GCS
+    blob.upload_from_string(csv_buffer, content_type='text/csv')
+    print(f"File {file_name} uploaded to {folder}/{file_name} in bucket {bucket_name}.")
     
 if __name__ == "__main__":
-    cleaned_df_name, cleaned_df_path = clean_energy_data(FILE_PATH)
-    destination_blob_name = f"{GCP_FOLDER}/{os.path.basename(cleaned_df_name)}"
-    upload_to_gcs(cleaned_df_path, GCP_BUCKET, destination_blob_name)
+    
+    month_var = 2
+    year_var = 2024
+    
+    next_month_var = 3
+    
+    # Authenticate with GCS once
+    storage_client = authenticate_with_gcs()
+    
+    # Clean the new data
+    new_data = clean_energy_data(FILE_PATH)
+    
+    # Download the existing data
+    existing_data = download_existing_data(storage_client, GCP_BUCKET, GCP_FOLDER, 'energy_consumption-{month_var}-{year_var}.csv')
+    
+    destination_blob_name = f"{GCP_FOLDER}/{os.path.basename('energy_consumption-{next_month_var}-{year_var}.csv')}"
+
+    if not existing_data.equals(new_data):
+        # Upload the new data to GCS
+        upload_to_gcs(storage_client, new_data, GCP_BUCKET, GCP_FOLDER, destination_blob_name)
+    else:
+        print("No changes detected. Data not updated.")
