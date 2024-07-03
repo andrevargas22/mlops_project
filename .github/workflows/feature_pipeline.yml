@@ -1,4 +1,4 @@
-name: Extract Data
+name: Feature Pipeline
 
 on:
   schedule:
@@ -24,18 +24,44 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install requests beautifulsoup4
+        pip install requests beautifulsoup4 google-cloud-storage pandas
 
     - name: Run extraction script
       run: python src/extract.py
 
     - name: Upload extraction status
       run: echo "Extraction successful" > extraction_status.txt
-      if: ${{ success() }}
-      continue-on-error: true
 
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
         name: extraction-status
         path: extraction_status.txt
+
+  upload-data:
+    needs: extract-data
+    runs-on: ubuntu-latest
+
+    env:
+      PROJECT_ID: mlops-project-428219
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - id: 'auth'
+      name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v1
+      with: 
+        project_id: '${{ env.PROJECT_ID }}'
+        credentials_json: '${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}'
+
+    - name: Run upload script
+      env:
+        GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+      run: python src/upload_to_gcs.py
