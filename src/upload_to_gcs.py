@@ -8,7 +8,7 @@ from google.cloud import storage
 GCP_PROJECT = 'mlops-project-428219'
 GCP_BUCKET = 'mlops_energy_consumption_data'
 GCP_FOLDER = 'energy_data'
-FILE_PATH = 'data/raw/consumo_mar.xls'
+FILE_PATH = 'data/raw/consumo.xls'
 
 def authenticate_with_gcs():
     """
@@ -143,22 +143,14 @@ def upload_to_gcs(storage_client, dataframe, bucket_name, folder, file_name):
     
 if __name__ == "__main__":
     
-    month_var = str(3)
-    year_var = str(2024)
-    
-    next_month_var = str(4)
-    
+    current_date = datetime.now()
+    month_var = str(current_date.month-1)
+    year_var = str(current_date.year)
+        
     # Authenticate with GCS once
     storage_client = authenticate_with_gcs()
     
     # Clean the new data
     new_data = clean_energy_data(FILE_PATH)
     
-    # Download the existing data
-    existing_data = download_existing_data(storage_client, GCP_BUCKET, GCP_FOLDER, f'energy_consumption-{month_var}-{year_var}.csv')
-    
-    if not existing_data.equals(new_data):
-        # Upload the new data to GCS
-        upload_to_gcs(storage_client, new_data, GCP_BUCKET, GCP_FOLDER, f'energy_consumption-{next_month_var}-{year_var}.csv')
-    else:
-        print("No changes detected. Data not updated.")
+    upload_to_gcs(storage_client, new_data, GCP_BUCKET, GCP_FOLDER, f'energy_consumption-{month_var}-{year_var}.csv')
