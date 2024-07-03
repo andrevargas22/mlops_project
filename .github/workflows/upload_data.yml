@@ -1,13 +1,14 @@
-name: Upload CSV to GCS
+name: Upload Data
 
 on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+  workflow_run:
+    workflows: ["Extract Data"]
+    types:
+      - completed
 
 jobs:
-  upload-csv:
+  upload-data:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     env:
@@ -25,7 +26,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install google-cloud-storage pandas xlrd
+        pip install google-cloud-storage pandas
 
     - id: 'auth'
       name: Authenticate to Google Cloud
