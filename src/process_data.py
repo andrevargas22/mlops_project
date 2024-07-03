@@ -38,6 +38,47 @@ def download_existing_data(storage_client, bucket_name, folder, file_name):
     recent_df = pd.read_csv(file_name)
     return recent_df
 
+def process_data(df):
+    
+    # Map month names to month numbers
+    month_map = {
+        'Janeiro': 1,
+        'Fevereiro': 2,
+        'Março': 3,
+        'Abril': 4,
+        'Maio': 5,
+        'Junho': 6,
+        'Julho': 7,
+        'Agosto': 8,
+        'Setembro': 9,
+        'Outubro': 10,
+        'Novembro': 11,
+        'Dezembro': 12
+    }
+
+    # Apply the month_map to create a month number column
+    df['Month'] = df['Month'].map(month_map)
+
+    # Pegar a estação do ano e criar uma coluna Estação 
+    def get_season(month):
+        if month in [12, 1, 2]:
+            return 'Summer'
+        elif month in [3, 4, 5]:
+            return 'Autumn'
+        elif month in [6, 7, 8]:
+            return 'Winter'
+        else:
+            return 'Spring'
+        
+    df['Season'] = df['Month'].apply(get_season)
+    
+    # sort by Region, Year, Month
+    df = df.sort_values(['Region', 'Year', 'Month']).reset_index(drop=True)
+    
+    df = df[['Region', 'Year', 'Month', 'Season', 'Energy']]
+    
+    return df
+    
 if __name__ == "__main__":
     
     current_date = datetime.now()
@@ -51,5 +92,6 @@ if __name__ == "__main__":
     
     # Download the file from GCS
     energy_df = download_existing_data(storage_client, GCP_BUCKET, GCP_FOLDER, FILE_NAME)
+    energy_processed = process_data(energy_df)
     
-    print(energy_df)
+    print(energy_processed)
