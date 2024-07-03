@@ -159,6 +159,6 @@ if __name__ == "__main__":
     
     if not existing_data.equals(new_data):
         # Upload the new data to GCS
-        upload_to_gcs(storage_client, new_data, GCP_BUCKET, GCP_FOLDER, f'energy_consumption-{next_month_var}-{year_var}.csv'))
+        upload_to_gcs(storage_client, new_data, GCP_BUCKET, GCP_FOLDER, f'energy_consumption-{next_month_var}-{year_var}.csv')
     else:
         print("No changes detected. Data not updated.")
