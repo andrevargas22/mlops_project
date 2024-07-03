@@ -143,10 +143,10 @@ def upload_to_gcs(storage_client, dataframe, bucket_name, folder, file_name):
     
 if __name__ == "__main__":
     
-    month_var = 2
-    year_var = 2024
+    month_var = str(2)
+    year_var = str(2024)
     
-    next_month_var = 3
+    next_month_var = str(3)
     
     # Authenticate with GCS once
     storage_client = authenticate_with_gcs()
@@ -155,9 +155,9 @@ if __name__ == "__main__":
     new_data = clean_energy_data(FILE_PATH)
     
     # Download the existing data
-    existing_data = download_existing_data(storage_client, GCP_BUCKET, GCP_FOLDER, 'energy_consumption-{month_var}-{year_var}.csv')
+    existing_data = download_existing_data(storage_client, GCP_BUCKET, GCP_FOLDER, f'energy_consumption-{month_var}-{year_var}.csv')
     
-    destination_blob_name = f"{GCP_FOLDER}/{os.path.basename('energy_consumption-{next_month_var}-{year_var}.csv')}"
+    destination_blob_name = f"{GCP_FOLDER}/{os.path.basename(f'energy_consumption-{next_month_var}-{year_var}.csv')}"
 
     if not existing_data.equals(new_data):
         # Upload the new data to GCS
