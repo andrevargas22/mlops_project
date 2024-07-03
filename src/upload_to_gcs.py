@@ -157,10 +157,8 @@ if __name__ == "__main__":
     # Download the existing data
     existing_data = download_existing_data(storage_client, GCP_BUCKET, GCP_FOLDER, f'energy_consumption-{month_var}-{year_var}.csv')
     
-    destination_blob_name = f"{GCP_FOLDER}/{os.path.basename(f'energy_consumption-{next_month_var}-{year_var}.csv')}"
-
     if not existing_data.equals(new_data):
         # Upload the new data to GCS
-        upload_to_gcs(storage_client, new_data, GCP_BUCKET, GCP_FOLDER, destination_blob_name)
+        upload_to_gcs(storage_client, new_data, GCP_BUCKET, GCP_FOLDER, f'energy_consumption-{next_month_var}-{year_var}.csv'))
     else:
         print("No changes detected. Data not updated.")
