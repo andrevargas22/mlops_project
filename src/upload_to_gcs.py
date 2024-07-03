@@ -143,10 +143,10 @@ def upload_to_gcs(storage_client, dataframe, bucket_name, folder, file_name):
     
 if __name__ == "__main__":
     
-    month_var = str(2)
+    month_var = str(3)
     year_var = str(2024)
     
-    next_month_var = str(3)
+    next_month_var = str(4)
     
     # Authenticate with GCS once
     storage_client = authenticate_with_gcs()
