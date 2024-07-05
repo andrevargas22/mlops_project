@@ -100,4 +100,4 @@ if __name__ == "__main__":
     energy_df = download_existing_data(storage_client, GCP_BUCKET, GCP_FOLDER, FILE_NAME)
     energy_processed = process_data(energy_df)
     
-    print(energy_processed)
+    energy_processed.to_csv('data/raw/processed_data.csv', index=False)
