@@ -37,7 +37,7 @@ jobs:
     - name: Run data process script
       env:
         GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
-      run: python src/process_data.py
+      run: python src/3) process_data.py
 
     - name: Upload processed data
       uses: actions/upload-artifact@v2
@@ -70,4 +70,4 @@ jobs:
         path: data/raw
 
     - name: Run training script
-      run: python src/train_model.py
+      run: python src/4) train_model.py
