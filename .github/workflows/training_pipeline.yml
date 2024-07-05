@@ -7,7 +7,7 @@ on:
   workflow_dispatch:  # Permite a execução manual do workflow
 
 jobs:
-  train-model:
+  process-data:
     runs-on: ubuntu-latest
 
     env:
@@ -38,3 +38,36 @@ jobs:
       env:
         GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
       run: python src/process_data.py
+
+    - name: Upload processed data
+      uses: actions/upload-artifact@v2
+      with:
+        name: processed-data
+        path: data/raw/processed_data.csv
+
+  train-model:
+    needs: process-data
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pandas
+
+    - name: Download processed data
+      uses: actions/download-artifact@v2
+      with:
+        name: processed-data
+        path: data/raw
+
+    - name: Run training script
+      run: python src/train_model.py

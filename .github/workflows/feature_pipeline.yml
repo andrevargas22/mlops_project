@@ -25,7 +25,7 @@ jobs:
         pip install requests beautifulsoup4
 
     - name: Run extraction script
-      run: python src/extract.py
+      run: python src/1) extract.py
 
     - name: Upload extracted data
       uses: actions/upload-artifact@v2
@@ -79,4 +79,4 @@ jobs:
     - name: Run upload script
       env:
         GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
-      run: python src/upload_to_gcs.py
+      run: python src/2) upload_to_gcs.py
